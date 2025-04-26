@@ -34,10 +34,6 @@ fi
 # Create the final output file name with date
 output_file="${output_name}_${current_date}.txt"
 
-# Count lines containing actual songs (non-empty lines)
-song_lines=$(grep -c -v "^$" "$file_path")
-echo "Found $song_lines songs in the library file."
-
 # Create a temporary file with each song on its own line
 temp_file=$(mktemp)
 grep -v "^$" "$file_path" > "$temp_file"
