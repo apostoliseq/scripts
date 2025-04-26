@@ -47,5 +47,8 @@ truncate -s -1 "$output_file"
 # Clean up temporary file
 rm "$temp_file"
 
+# Move file
+mv $output_file "/mnt/d/7._Music/$output_file"
+
 # Display completion message
 echo "Reversed and numbered list has been saved to: $output_file"
