@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Container runtime is CRI-O
 VERSION=v1.33
 
 # Check network adapters (ensure only 1 exists)
