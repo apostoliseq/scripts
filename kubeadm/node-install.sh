@@ -14,7 +14,6 @@ sudo sed -i '/swap/s/^/# /' /etc/fstab
 sudo swapoff -a
 free -h
 
-# Install CRI-O
 sudo apt-get update -y && sudo apt-get install -y software-properties-common curl gpg apt-transport-https ca-certificates
 
 curl -fsSL https://pkgs.k8s.io/core:/stable:/$VERSION/deb/Release.key |
@@ -29,17 +28,19 @@ curl -fsSL https://download.opensuse.org/repositories/isv:/cri-o:/stable:/$VERSI
 echo "deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://download.opensuse.org/repositories/isv:/cri-o:/stable:/$VERSION/deb/ /" |
     sudo tee /etc/apt/sources.list.d/cri-o.list
 
-# Install kubeadm, kubelet and kubectl
 sudo apt-get update -y && sudo apt-get install -y cri-o kubelet kubeadm kubectl
+
 # Pin their version
 sudo apt-mark hold kubelet kubeadm kubectl
 
 sudo systemctl start crio.service
 sudo systemctl enable crio.service
 
+# Load the bridge netfilter kernel module to allow iptables to see bridge network traffic
 sudo modprobe br_netfilter
-sudo sysctl -w net.ipv4.ip_forward=1
 
+# Enable and make persistent IP forwarding in the kernel to allow packets to be routed between different network interfaces
+sudo sysctl -w net.ipv4.ip_forward=1
 echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
 
 sudo systemctl enable --now kubelet
