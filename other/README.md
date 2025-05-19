@@ -1,3 +1,5 @@
+# transform-spotify-playlist.sh
+
 # read
 Wait for user input and save it to variable
 
