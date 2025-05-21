@@ -24,21 +24,33 @@ if [ -n "$GROUPZ" ]; then
     for group in "${GROUP_ARRAY[@]}"; do
         SUBJECT="$SUBJECT/O=$group"
     done
+    
+    # Set default namespace to the first group if not empty
+    if [ ${#GROUP_ARRAY[@]} -gt 0 ]; then
+        DEFAULT_NAMESPACE="${GROUP_ARRAY[0]}"
+        echo "Setting default namespace to: $DEFAULT_NAMESPACE"
+    fi
 else
     echo "No groups specified."
 fi
 
-# Create private key, used to prove user's identity
 openssl genrsa -out $NAME.key 2048
-
-# Create user's public key, used to ask for identity certification
 openssl req -new -key $NAME.key -out $NAME.csr -subj "$SUBJECT"
 
 # Inspect
 openssl req -in $NAME.csr -noout -text
 
-# Create user's CA-signed certificate that contains the user's public key and identity information
+# Sign
 sudo openssl x509 -req -in $NAME.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out $NAME.crt -days $EXP_DAYS
 
 # Cleanup
 rm $NAME.csr
+
+# Create kubeconfig
+kubectl --kubeconfig=$NAME.config config set-cluster ${NAME}cluster --embed-certs --server=$(kubectl config view -o jsonpath='{.clusters[0].cluster.server}') --certificate-authority=/etc/kubernetes/pki/ca.crt
+
+kubectl --kubeconfig=$NAME.config config set-credentials $NAME --embed-certs --client-certificate=$NAME.crt --client-key=$NAME.key
+
+kubectl --kubeconfig=$NAME.config config set-context ${NAME}ctx --cluster=${NAME}cluster --user=$NAME --namespace=$DEFAULT_NAMESPACE
+
+kubectl --kubeconfig=$NAME.config config use-context ${NAME}ctx --cluster=${NAME}cluster --user=$NAME
