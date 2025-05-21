@@ -34,13 +34,15 @@ else
     echo "No groups specified."
 fi
 
+# Create private key, used to prove user's identity
 openssl genrsa -out $NAME.key 2048
+# Create user's public key, used to ask for identity certification
 openssl req -new -key $NAME.key -out $NAME.csr -subj "$SUBJECT"
 
 # Inspect
 openssl req -in $NAME.csr -noout -text
 
-# Sign
+# Create user's CA-signed certificate that contains the user's public key and identity information
 sudo openssl x509 -req -in $NAME.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out $NAME.crt -days $EXP_DAYS
 
 # Cleanup
@@ -54,3 +56,6 @@ kubectl --kubeconfig=$NAME.config config set-credentials $NAME --embed-certs --c
 kubectl --kubeconfig=$NAME.config config set-context ${NAME}ctx --cluster=${NAME}cluster --user=$NAME --namespace=$DEFAULT_NAMESPACE
 
 kubectl --kubeconfig=$NAME.config config use-context ${NAME}ctx --cluster=${NAME}cluster --user=$NAME
+
+# Verify
+kubectl --kubeconfig=$NAME.config version
