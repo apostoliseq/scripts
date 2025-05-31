@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Which version to install (number only)?"
-read VERSION
+read -p VERSION
 
 [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v${VERSION}/kind-$(uname)-amd64
 
