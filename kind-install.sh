@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# read -p "Which version to install (version number only)? " kind_version
 read -p $'Which version to install (version number only)?\n(https://github.com/kubernetes-sigs/kind/releases)\n> ' kind_version
-# https://github.com/kubernetes-sigs/kind/releases
 
 [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v${kind_version}/kind-$(uname)-amd64
 
